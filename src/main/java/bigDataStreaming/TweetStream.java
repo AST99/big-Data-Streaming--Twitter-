@@ -1,15 +1,15 @@
 package bigDataStreaming;
 
-import java.io.IOException;
-
-import org.apache.spark.*;
-import org.apache.spark.api.java.function.*;
-import org.apache.spark.streaming.*;
-import org.apache.spark.streaming.api.java.*;
-import org.apache.spark.streaming.twitter.*;
-import twitter4j.Status;
-import org.apache.log4j.Logger;
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.function.Function;
+import org.apache.spark.streaming.Duration;
+import org.apache.spark.streaming.api.java.JavaDStream;
+import org.apache.spark.streaming.api.java.JavaReceiverInputDStream;
+import org.apache.spark.streaming.api.java.JavaStreamingContext;
+import org.apache.spark.streaming.twitter.TwitterUtils;
+import twitter4j.Status;
 
 public class TweetStream {
 
@@ -21,45 +21,49 @@ public class TweetStream {
 
     public static void main(String[] args) {
 
-        Logger.getLogger("org").setLevel(Level.OFF);  //Permet de masquer les logs spark qui ne sont pas pertinant.
-                                                     // On visualise directement les tweet reçus
+        try {
+            Logger.getLogger("org").setLevel(Level.OFF);  //Permet de masquer les logs spark qui ne sont pas pertinant.
+            // On visualise directement les tweet reçus
 
-        TweetStream ts = new TweetStream();
-        //ts.setAccessToken();
+            TweetStream ts = new TweetStream();
+            //ts.setAccessToken();
 
-        //Configuration du cluster
-        SparkConf conf = new SparkConf().setMaster("local[2]").setAppName("Twitter_spark_streaming");
-        // "setMaster("local[2]")" => pour dire que le programme sera lancé en local en utilisant 2 threads
+            //Configuration du cluster
+            SparkConf conf = new SparkConf().setMaster("local[2]").setAppName("Twitter_spark_streaming");
+            // "setMaster("local[2]")" => pour dire que le programme sera lancé en local en utilisant 2 threads
 
-        JavaStreamingContext jsc = new JavaStreamingContext(conf, new Duration(15000));
+            JavaStreamingContext jsc = new JavaStreamingContext(conf, new Duration(15000));
 
-        //Affectation des paramètres d'authentification
-        System.setProperty("twitter4j.oauth.key",ts.getKey());
-        System.setProperty("twitter4j.oauth.keySecret",ts.getKeySecret());
-        System.setProperty("twitter4j.oauth.accessToken",ts.getAccessToken());
-        System.setProperty("twitter4j.oauth.accessTokenSecret",ts.getAccessTokenSecret());
-
-
-        //On commence ici à recevoir les flux twitter (Sans flitre)
-        JavaReceiverInputDStream<Status> twitterStream = TwitterUtils.createStream(jsc); /*On aura le flux directement
-                                                                                          * collecter via l'api twitter
-                                                                                          * qui contient les tweets avec
-                                                                                          * les meta données
-                                                                                          */
-
-        final JavaDStream<String> status = twitterStream.map((Function<Status, String>) v1 -> v1.getText());
-
-        /*Avant d'afficher via <<status.print>>, nous allons parcourir les tweets reçus et extraire seulement le text ou
-         * le corps du tweet à partir de <<v1.getText()>>
-         */
-
-        status.print();
+            //Affectation des paramètres d'authentification
+            System.setProperty("twitter4j.oauth.key",ts.getKey());
+            System.setProperty("twitter4j.oauth.keySecret",ts.getKeySecret());
+            System.setProperty("twitter4j.oauth.accessToken",ts.getAccessToken());
+            System.setProperty("twitter4j.oauth.accessTokenSecret",ts.getAccessTokenSecret());
 
 
-        jsc.start();
-        jsc.awaitTermination();  /* Permet de dire au programme de ne pas faire un stop et d'attendre que tous
-                                  * les excécuteurs finissent leurs taches avant d'arrêter le programme.
-                                  */
+            //On commence ici à recevoir les flux twitter (Sans flitre)
+            JavaReceiverInputDStream<Status> twitterStream = TwitterUtils.createStream(jsc); /*On aura le flux directement
+             * collecter via l'api twitter
+             * qui contient les tweets avec
+             * les meta données
+             */
+
+            final JavaDStream<String> status = twitterStream.map((Function<Status, String>) v1 -> v1.getText());
+
+            /*Avant d'afficher via <<status.print>>, nous allons parcourir les tweets reçus et extraire seulement le text ou
+             * le corps du tweet à partir de <<v1.getText()>>
+             */
+
+            status.print();
+
+
+            jsc.start();
+            jsc.awaitTermination();  /* Permet de dire au programme de ne pas faire un stop et d'attendre que tous
+             * les excécuteurs finissent leurs taches avant d'arrêter le programme.
+             */
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public String getKey() {
