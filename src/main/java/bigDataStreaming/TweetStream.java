@@ -13,10 +13,10 @@ import twitter4j.Status;
 
 public class TweetStream {
 
-    String key = "xF6WElcY90sc3XQunUINZsoYC";
-    String keySecret = "Tf2Sj4cM4AFYgLSnZAzQqhCKb1tqQihMogkLELl5lZwewbhRJy";
-    String accessToken = "1469028155361054725-7gvH4bU87NrCOilDijgZBZOhxrSAVh";
-    String accessTokenSecret = "euSB36d7mF7OBXKxO26O4oM31MeeD0SKUIu044pG4csoE";
+    String key;
+    String keySecret;
+    String accessToken;
+    String accessTokenSecret;
 
 
     public static void main(String[] args) {
@@ -26,7 +26,7 @@ public class TweetStream {
             // On visualise directement les tweet reçus
 
             TweetStream ts = new TweetStream();
-            //ts.setAccessToken();
+            ts.setToken();
 
             //Configuration du cluster
             SparkConf conf = new SparkConf().setMaster("local[2]").setAppName("Twitter_spark_streaming");
@@ -64,6 +64,13 @@ public class TweetStream {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void setToken(){
+        setKey("xF6WElcY90sc3XQunUINZsoYC");
+        setKeySecret("Tf2Sj4cM4AFYgLSnZAzQqhCKb1tqQihMogkLELl5lZwewbhRJy");
+        setAccessToken("1469028155361054725-7gvH4bU87NrCOilDijgZBZOhxrSAVh");
+        setAccessTokenSecret("euSB36d7mF7OBXKxO26O4oM31MeeD0SKUIu044pG4csoE");
     }
 
     public String getKey() {
